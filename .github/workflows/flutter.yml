@@ -1,0 +1,19 @@
+     name: Flutter Build
+     on:
+       push:
+         branches: [ main ]
+       pull_request:
+         branches: [ main ]
+     jobs:
+       build:
+         runs-on: macos-latest
+         steps:
+           - uses: actions/checkout@v3
+           - name: Set up Flutter
+             uses: subosito/flutter - action@v2
+             with:
+               flutter - version: '3.0.0' # 根据实际需要设置Flutter版本
+           - name: Install dependencies
+             run: flutter pub get
+           - name: Build Flutter project
+             run: flutter build macos # 这里可以根据需要改为其他构建目标，如flutter build ios、flutter build web等
