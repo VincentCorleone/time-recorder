@@ -1,9 +1,8 @@
 name: Flutter Build
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    tags:
+      - 'v*.*.*' # 仅在推送以 v 开头的语义化版本标签时触发该工作流程，确保是正式的版本发布操作
 jobs:
   build:
     runs-on: macos-latest
@@ -28,9 +27,9 @@ jobs:
           release_name: Release v1.0.0
           draft: false
           prerelease: false
-      - name: Upload artifacts
+      - name: Upload MacOS Application to Release
         uses: actions/upload-artifact@v3
         with:
-          name: Flutter-app
-          path: build/macos
+          name: Flutter-MacOS-App
+          path: build/macos/Build/Products/Release
           upload-to-release: ${{ steps.create_release.outputs.id }}
