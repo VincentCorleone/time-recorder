@@ -10,7 +10,7 @@
          steps:
            - uses: actions/checkout@v3
            - name: Set up Flutter
-             uses: subosito/flutter - action@v2
+             uses: subosito/flutter-action@v2
              with:
                flutter - version: '3.0.0' # 根据实际需要设置Flutter版本
            - name: Install dependencies
