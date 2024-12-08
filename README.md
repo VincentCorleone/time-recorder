@@ -6,6 +6,7 @@ This project is assisted by Cursor, which really impressed me. I finished this p
 
 MacOS version and Windows version are both released.
 
+
 ## Screenshots
 
 ![HomePage](readme/Snipaste_1.png)
