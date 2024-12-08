@@ -24,9 +24,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.SECRET_FOR_FLUTTER }}
         with:
           # 使用从Git标签获取并设置的变量作为tag_name的值
-          tag_name: ${{ steps.tag_vars.outputs.tag_name }}
+          tag_name: ${{ github.event.inputs.tag_name }}
           # 使用从Git标签获取并设置的变量作为release_name的值
-          release_name: Release ${{ steps.tag_vars.outputs.release_name }}
+          release_name: Release ${{ github.event.inputs.tag_name }}
           draft: false
           prerelease: false
       - name: Upload artifacts
