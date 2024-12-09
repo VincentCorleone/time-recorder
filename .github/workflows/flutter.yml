@@ -16,8 +16,8 @@ jobs:
         run: flutter pub get
       - name: Build Flutter project
         run: flutter build macos # 这里可以根据需要改为其他构建目标，如flutter build ios、flutter build web等
-      - name: Setup Debug Session
-        uses: csexton/debugger-action@master
+      # - name: Setup Debug Session
+      #   uses: csexton/debugger-action@master
       - name: Compress app
         run: |
           cd build/macos/Build/Products/Release
