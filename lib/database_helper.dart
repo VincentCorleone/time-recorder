@@ -36,6 +36,15 @@ class DatabaseHelper {
         duration INTEGER NOT NULL
       )
     ''');
+    
+    // 添加未完成任务表
+    await db.execute('''
+      CREATE TABLE unfinished_task(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        startTime TEXT NOT NULL
+      )
+    ''');
   }
 
   Future<int> insertTask(String name, DateTime startTime, DateTime endTime) async {
@@ -56,6 +65,45 @@ class DatabaseHelper {
     final db = await database;
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
+    final endOfDay = startOfDay.add(Duration(days: 1));
+
+    return await db.query(
+      'tasks',
+      where: 'startTime BETWEEN ? AND ?',
+      whereArgs: [startOfDay.toIso8601String(), endOfDay.toIso8601String()],
+      orderBy: 'startTime ASC',
+    );
+  }
+
+  // 保存未完成任务
+  Future<void> saveUnfinishedTask(String name, DateTime startTime) async {
+    final db = await database;
+    // 先清除之前的未完成任务
+    await db.delete('unfinished_task');
+    // 保存新的未完成任务
+    await db.insert('unfinished_task', {
+      'name': name,
+      'startTime': startTime.toIso8601String(),
+    });
+  }
+
+  // 获取未完成任务
+  Future<Map<String, dynamic>?> getUnfinishedTask() async {
+    final db = await database;
+    final results = await db.query('unfinished_task');
+    if (results.isEmpty) return null;
+    return results.first;
+  }
+
+  // 清除未完成任务
+  Future<void> clearUnfinishedTask() async {
+    final db = await database;
+    await db.delete('unfinished_task');
+  }
+
+  Future<List<Map<String, dynamic>>> getDayTasks(DateTime date) async {
+    final db = await database;
+    final startOfDay = DateTime(date.year, date.month, date.day);
     final endOfDay = startOfDay.add(Duration(days: 1));
 
     return await db.query(

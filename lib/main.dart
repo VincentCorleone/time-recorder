@@ -3,16 +3,36 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'clock_page.dart';
 import 'database_helper.dart';
+import 'day_records_page.dart';
+import 'package:table_calendar/table_calendar.dart';
 
-void main() {
-  runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  final unfinishedTask = await DatabaseHelper.instance.getUnfinishedTask();
+  
+  runApp(MyApp(unfinishedTask: unfinishedTask));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Map<String, dynamic>? unfinishedTask;
+  
+  const MyApp({super.key, this.unfinishedTask});
 
   @override
   Widget build(BuildContext context) {
+    Widget home;
+    if (unfinishedTask != null) {
+      final taskName = unfinishedTask!['name'];
+      final startTime = DateTime.parse(unfinishedTask!['startTime']);
+      home = ClockPage(
+        task: taskName,
+        resumeStartTime: startTime,
+      );
+    } else {
+      home = MainScreen();
+    }
+
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
@@ -22,7 +42,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
         ),
         debugShowCheckedModeBanner: false,
-        home: MainScreen(),
+        home: home,
       ),
     );
   }
@@ -229,8 +249,30 @@ class TodayRecordsPage extends StatelessWidget {
 class HistoryRecordsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('历史记录页面'),
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: TableCalendar(
+          firstDay: DateTime.utc(2023, 1, 1),
+          lastDay: DateTime.now(),
+          focusedDay: DateTime.now(),
+          calendarFormat: CalendarFormat.month,
+          headerStyle: HeaderStyle(
+            formatButtonVisible: false,
+            titleCentered: true,
+          ),
+          onDaySelected: (selectedDay, focusedDay) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DayRecordsPage(
+                  selectedDate: selectedDay,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

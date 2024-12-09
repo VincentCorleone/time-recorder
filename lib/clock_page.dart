@@ -6,7 +6,13 @@ import 'package:path/path.dart';
 
 class ClockPage extends StatefulWidget {
   final String task;
-  const ClockPage({super.key, required this.task});
+  final DateTime? resumeStartTime;
+  
+  const ClockPage({
+    super.key, 
+    required this.task, 
+    this.resumeStartTime,
+  });
 
   @override
   State<ClockPage> createState() => _ClockPageState();
@@ -24,7 +30,20 @@ class _ClockPageState extends State<ClockPage> with SingleTickerProviderStateMix
   @override
   void initState() {
     super.initState();
-    startTime = DateTime.now();
+    // 使用恢复时间或当前时间
+    startTime = widget.resumeStartTime ?? DateTime.now();
+    
+    // 如果是恢复的任务，计算已经过的时间
+    if (widget.resumeStartTime != null) {
+      final elapsed = DateTime.now().difference(widget.resumeStartTime!);
+      hours = elapsed.inHours;
+      elapsedMinutes = (elapsed.inMinutes % 60);
+      seconds = (elapsed.inSeconds % 60);
+    }
+
+    // 保存未完成任务
+    DatabaseHelper.instance.saveUnfinishedTask(widget.task, startTime);
+    
     _animationController = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
@@ -76,7 +95,7 @@ class _ClockPageState extends State<ClockPage> with SingleTickerProviderStateMix
     
     await _saveTaskToDatabase();
     
-    // 等待 2 秒让用户看到提示
+    // 等待 2 秒让用户看提示
     await Future.delayed(Duration(seconds: 2));
     
     if (mounted) {
@@ -94,7 +113,7 @@ class _ClockPageState extends State<ClockPage> with SingleTickerProviderStateMix
   Future<void> _saveTaskToDatabase() async {
     final endTime = DateTime.now();
     try {
-      // 获取数据库路径
+      await DatabaseHelper.instance.clearUnfinishedTask();
       final dbPath = await getDatabasesPath();
       final path = join(dbPath, 'tasks.db');
       print('SQLite数据库文件路径: $path');
