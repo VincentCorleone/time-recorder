@@ -62,40 +62,48 @@ class _MainScreenState extends State<MainScreen> {
     HistoryRecordsPage(),
   ];
 
+  void _onDestinationSelected(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    Navigator.pop(context); // 关闭抽屉
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Row(
-        children: [
-          NavigationRail(
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: (int index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
-            labelType: NavigationRailLabelType.all,
-            destinations: const [
-              NavigationRailDestination(
-                icon: Icon(Icons.play_circle_outline),
-                label: Text('开始记录'),
+      appBar: AppBar(
+        title: Text(['开始记录', '今日记录', '历史记录'][_selectedIndex]),
+      ),
+      drawer: NavigationDrawer(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: _onDestinationSelected,
+        children: const [
+          Padding(
+            padding: EdgeInsets.fromLTRB(28, 16, 16, 10),
+            child: Text(
+              '时间记录',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
               ),
-              NavigationRailDestination(
-                icon: Icon(Icons.today),
-                label: Text('今日记录'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.history),
-                label: Text('历史记录'),
-              ),
-            ],
+            ),
           ),
-          VerticalDivider(thickness: 1, width: 1),
-          Expanded(
-            child: _pages[_selectedIndex],
+          NavigationDrawerDestination(
+            icon: Icon(Icons.play_circle_outline),
+            label: Text('开始记录'),
+          ),
+          NavigationDrawerDestination(
+            icon: Icon(Icons.today),
+            label: Text('今日记录'),
+          ),
+          NavigationDrawerDestination(
+            icon: Icon(Icons.history),
+            label: Text('历史记录'),
           ),
         ],
       ),
+      body: _pages[_selectedIndex],
     );
   }
 }
