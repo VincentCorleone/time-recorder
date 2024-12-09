@@ -11,7 +11,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter - version: '3.0.0' # 根据实际需要设置Flutter版本
+          flutter-version: '3.0.0' # 根据实际需要设置Flutter版本
       - name: Install dependencies
         run: flutter pub get
       - name: Build Flutter project
@@ -25,14 +25,13 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: build/macos/Build/Products/Release/your_app_name.app.zip
+          files: build/macos/Build/Products/Release/time_recorder.zip
           token: ${{ secrets.SECRET_FOR_FLUTTER }}
           draft: false
           prerelease: false
-
-      - name: Upload MacOS Application to Release
-        uses: actions/upload-artifact@v3
-        with:
-          name: Flutter-MacOS-App
-          path: build/macos/Build/Products/Release/time_recorder.zip
-          upload-to-release: ${{ steps.create_release.outputs.id }}
+          generate_release_notes: true
+          # 禁用自动包含源码
+          body: |
+            Time Recorder macOS 应用发布
+          # 确保不自动包含源码
+          append_body: true
