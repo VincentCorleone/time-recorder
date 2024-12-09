@@ -207,7 +207,7 @@ class TodayRecordsPage extends StatelessWidget {
           final formattedText = tasks.map((task) {
             final startTime = DateTime.parse(task['startTime']);
             final endTime = DateTime.parse(task['endTime']);
-            return '${_formatTime(startTime)}~${_formatTime(endTime)} ${task['name']} ${task['duration']}分钟';
+            return '${_formatTime(startTime)}~${_formatTime(endTime)} [${task['duration']}分钟] ${task['name']}';
           }).join('\n');
 
           await Clipboard.setData(ClipboardData(text: formattedText));
