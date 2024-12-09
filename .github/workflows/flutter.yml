@@ -5,38 +5,68 @@ on:
       - 'v*.*.*' # 仅在推送以 v 开头的语义化版本标签时触发该工作流程，确保是正式的版本发布操作
 jobs:
   build:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+        include:
+          - os: macos-latest
+            build_target: macos
+            asset_extension: zip
+            asset_content_type: application/zip
+          - os: windows-latest
+            build_target: windows
+            asset_extension: zip
+            asset_content_type: application/zip
+            
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
+      
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.0'  # 指定具体版本
+          flutter-version: '3.19.0'
           channel: 'stable'
-          architecture: x64  # 明确指定架构
           cache: true
+          
       - name: Check Flutter version
         run: flutter --version
+        
       - name: Install dependencies
         run: flutter pub get
+        
       - name: Build Flutter project
-        run: flutter build macos # 这里可以根据需要改为其他构建目标，如flutter build ios、flutter build web等
-      # - name: Setup Debug Session
-      #   uses: csexton/debugger-action@master
-      - name: Compress app
+        run: flutter build ${{ matrix.build_target }}
+        
+      - name: Compress artifacts (macOS)
+        if: matrix.os == 'macos-latest'
         run: |
           cd build/macos/Build/Products/Release
-          zip -r time_recorder.zip time_recorder.app
+          zip -r time_recorder_macos.zip time_recorder.app
+          
+      - name: Compress artifacts (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd build/windows/x64/runner/Release
+          Compress-Archive -Path * -DestinationPath time_recorder_windows.zip
+        shell: pwsh
+        
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: build/macos/Build/Products/Release/time_recorder.zip
+          files: |
+            build/macos/Build/Products/Release/time_recorder_macos.zip
+            build/windows/x64/runner/Release/time_recorder_windows.zip
           token: ${{ secrets.SECRET_FOR_FLUTTER }}
           draft: false
           prerelease: false
           generate_release_notes: true
-          # 禁用自动包含源码
           body: |
-            Time Recorder macOS 应用发布
-          # 确保不自动包含源码
-          append_body: true
+            Time Recorder 应用发布
+            
+            ### 支持平台
+            - macOS
+            - Windows
+          append_body: false 
