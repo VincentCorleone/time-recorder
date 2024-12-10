@@ -1,33 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'database_helper.dart';
+import '../utils/database_helper.dart';
+import '../utils/time_formatter.dart';
 
-class DayRecordsPage extends StatelessWidget {
-  final DateTime selectedDate;
-
-  const DayRecordsPage({super.key, required this.selectedDate});
-
+class TodayRecordsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('${selectedDate.year}年${selectedDate.month}月${selectedDate.day}日的记录'),
-      ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: DatabaseHelper.instance.getDayTasks(selectedDate),
+        future: DatabaseHelper.instance.getTodayTasks(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
-          
+
           if (snapshot.hasError) {
-            return Center(child: Text('加载失败: ${snapshot.error}'));
+            return Center(child: Text('载失败: ${snapshot.error}'));
           }
 
           final tasks = snapshot.data ?? [];
-          
+
           if (tasks.isEmpty) {
-            return Center(child: Text('这一天没有任何任务记录'));
+            return Center(child: Text('今天还没有完成任何任务'));
           }
 
           return ListView.builder(
@@ -43,7 +37,7 @@ class DayRecordsPage extends StatelessWidget {
                 child: ListTile(
                   title: Text(task['name']),
                   subtitle: Text(
-                    '${_formatTime(startTime)}~${_formatTime(endTime)}',
+                    '${TimeFormatter.formatTime(startTime)}~${TimeFormatter.formatTime(endTime)}',
                   ),
                   trailing: Text('$duration分钟'),
                 ),
@@ -54,25 +48,21 @@ class DayRecordsPage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final tasks = await DatabaseHelper.instance.getDayTasks(selectedDate);
+          final tasks = await DatabaseHelper.instance.getTodayTasks();
           final formattedText = tasks.map((task) {
             final startTime = DateTime.parse(task['startTime']);
             final endTime = DateTime.parse(task['endTime']);
-            return '${_formatTime(startTime)}~${_formatTime(endTime)} [${task['duration']}分钟] ${task['name']}';
+            return '${TimeFormatter.formatTime(startTime)}~${TimeFormatter.formatTime(endTime)} [${task['duration']}分钟] ${task['name']}';
           }).join('\n');
 
           await Clipboard.setData(ClipboardData(text: formattedText));
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('日志已复制到��贴板')),
+            SnackBar(content: Text('日志已复制到剪贴板')),
           );
         },
         backgroundColor: Colors.orange,
         child: Icon(Icons.copy),
       ),
     );
-  }
-
-  String _formatTime(DateTime time) {
-    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
   }
 } 
