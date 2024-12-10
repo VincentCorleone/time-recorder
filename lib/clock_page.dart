@@ -66,7 +66,7 @@ class _ClockPageState extends State<ClockPage>
         return;
       }
 
-      final elapsed = now.difference(widget.resumeStartTime!);
+      final elapsed = now.difference(startTime);
 
       setState(() {
         
