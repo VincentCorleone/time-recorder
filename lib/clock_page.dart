@@ -7,10 +7,10 @@ import 'package:path/path.dart';
 class ClockPage extends StatefulWidget {
   final String task;
   final DateTime? resumeStartTime;
-  
+
   const ClockPage({
-    super.key, 
-    required this.task, 
+    super.key,
+    required this.task,
     this.resumeStartTime,
   });
 
@@ -18,7 +18,8 @@ class ClockPage extends StatefulWidget {
   State<ClockPage> createState() => _ClockPageState();
 }
 
-class _ClockPageState extends State<ClockPage> with SingleTickerProviderStateMixin {
+class _ClockPageState extends State<ClockPage>
+    with SingleTickerProviderStateMixin {
   int hours = 0;
   int elapsedMinutes = 0;
   int seconds = 0;
@@ -32,7 +33,7 @@ class _ClockPageState extends State<ClockPage> with SingleTickerProviderStateMix
     super.initState();
     // 使用恢复时间或当前时间
     startTime = widget.resumeStartTime ?? DateTime.now();
-    
+
     // 如果是恢复的任务，计算已经过的时间
     if (widget.resumeStartTime != null) {
       final elapsed = DateTime.now().difference(widget.resumeStartTime!);
@@ -43,7 +44,7 @@ class _ClockPageState extends State<ClockPage> with SingleTickerProviderStateMix
 
     // 保存未完成任务
     DatabaseHelper.instance.saveUnfinishedTask(widget.task, startTime);
-    
+
     _animationController = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
@@ -58,7 +59,7 @@ class _ClockPageState extends State<ClockPage> with SingleTickerProviderStateMix
 
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       final now = DateTime.now();
-      
+
       // 检查是否到达23:59
       if (now.hour == 23 && now.minute == 59) {
         _autoComplete();
@@ -79,7 +80,7 @@ class _ClockPageState extends State<ClockPage> with SingleTickerProviderStateMix
     final navigatorContext = context as BuildContext;
     _timer.cancel();
     _animationController.stop();
-    
+
     // 显示提示信息
     ScaffoldMessenger.of(navigatorContext).showSnackBar(
       SnackBar(
@@ -87,12 +88,12 @@ class _ClockPageState extends State<ClockPage> with SingleTickerProviderStateMix
         duration: Duration(seconds: 2),
       ),
     );
-    
+
     await _saveTaskToDatabase();
-    
+
     // 等待 2 秒让用户看提示
     await Future.delayed(Duration(seconds: 2));
-    
+
     if (mounted) {
       Navigator.of(navigatorContext).pop();
     }
@@ -112,7 +113,7 @@ class _ClockPageState extends State<ClockPage> with SingleTickerProviderStateMix
       final dbPath = await getDatabasesPath();
       final path = join(dbPath, 'tasks.db');
       print('SQLite数据库文件路径: $path');
-      
+
       await DatabaseHelper.instance.insertTask(
         widget.task,
         startTime,
@@ -190,4 +191,4 @@ class _ClockPageState extends State<ClockPage> with SingleTickerProviderStateMix
       ),
     );
   }
-} 
+}

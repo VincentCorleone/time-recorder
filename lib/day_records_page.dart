@@ -66,8 +66,8 @@ class DayRecordsPage extends StatelessWidget {
             SnackBar(content: Text('日志已复制到��贴板')),
           );
         },
-        child: Icon(Icons.copy),
         backgroundColor: Colors.orange,
+        child: Icon(Icons.copy),
       ),
     );
   }

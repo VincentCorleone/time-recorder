@@ -131,7 +131,8 @@ class MyHomePage extends StatelessWidget {
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: '请输入您的计划',
-                    contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                   ),
                   style: TextStyle(fontSize: 14),
                 ),
@@ -192,13 +193,13 @@ class TodayRecordsPage extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
-          
+
           if (snapshot.hasError) {
             return Center(child: Text('载失败: ${snapshot.error}'));
           }
 
           final tasks = snapshot.data ?? [];
-          
+
           if (tasks.isEmpty) {
             return Center(child: Text('今天还没有完成任何任务'));
           }
@@ -239,8 +240,8 @@ class TodayRecordsPage extends StatelessWidget {
             SnackBar(content: Text('日志已复制到剪贴板')),
           );
         },
-        child: Icon(Icons.copy),
         backgroundColor: Colors.orange,
+        child: Icon(Icons.copy),
       ),
     );
   }
