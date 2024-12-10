@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'clock_page.dart';
 import 'database_helper.dart';
 import 'day_records_page.dart';
@@ -8,15 +7,15 @@ import 'package:table_calendar/table_calendar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   final unfinishedTask = await DatabaseHelper.instance.getUnfinishedTask();
-  
+
   runApp(MyApp(unfinishedTask: unfinishedTask));
 }
 
 class MyApp extends StatelessWidget {
   final Map<String, dynamic>? unfinishedTask;
-  
+
   const MyApp({super.key, this.unfinishedTask});
 
   @override
@@ -33,17 +32,14 @@ class MyApp extends StatelessWidget {
       home = MainScreen();
     }
 
-    return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
-      child: MaterialApp(
-        title: 'Namer App',
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
-        ),
-        debugShowCheckedModeBanner: false,
-        home: home,
+    return MaterialApp(
+      title: 'Namer App',
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
       ),
+      debugShowCheckedModeBanner: false,
+      home: home,
     );
   }
 }
@@ -283,8 +279,4 @@ class HistoryRecordsPage extends StatelessWidget {
       ),
     );
   }
-}
-
-class MyAppState extends ChangeNotifier {
-  // 可以在这里添加需要的状态
 }
