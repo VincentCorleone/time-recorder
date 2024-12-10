@@ -66,15 +66,10 @@ class _ClockPageState extends State<ClockPage> with SingleTickerProviderStateMix
       }
 
       setState(() {
-        seconds++;
-        if (seconds == 60) {
-          seconds = 0;
-          elapsedMinutes++;
-          if (elapsedMinutes == 60) {
-            elapsedMinutes = 0;
-            hours++;
-          }
-        }
+        final elapsed = DateTime.now().difference(widget.resumeStartTime!);
+        hours = elapsed.inHours;
+        elapsedMinutes = (elapsed.inMinutes % 60);
+        seconds = (elapsed.inSeconds % 60);
       });
     });
   }
