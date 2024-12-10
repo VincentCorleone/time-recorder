@@ -66,8 +66,10 @@ class _ClockPageState extends State<ClockPage>
         return;
       }
 
+      final elapsed = now.difference(widget.resumeStartTime!);
+
       setState(() {
-        final elapsed = DateTime.now().difference(widget.resumeStartTime!);
+        
         hours = elapsed.inHours;
         elapsedMinutes = (elapsed.inMinutes % 60);
         seconds = (elapsed.inSeconds % 60);
