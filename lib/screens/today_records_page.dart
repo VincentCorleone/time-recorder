@@ -49,13 +49,26 @@ class TodayRecordsPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final tasks = await DatabaseHelper.instance.getTodayTasks();
+
+          // 计算总时间
+          int totalMinutes =
+              tasks.fold(0, (sum, task) => sum + (task['duration'] as int));
+          final totalHours = totalMinutes ~/ 60;
+          final remainingMinutes = totalMinutes % 60;
+
+          // 格式化任务列表
           final formattedText = tasks.map((task) {
             final startTime = DateTime.parse(task['startTime']);
             final endTime = DateTime.parse(task['endTime']);
             return '${TimeFormatter.formatTime(startTime)}~${TimeFormatter.formatTime(endTime)} [${task['duration']}分钟] ${task['name']}';
           }).join('\n');
 
-          await Clipboard.setData(ClipboardData(text: formattedText));
+          // 添加总时间统计
+          final textWithTotal = '''$formattedText
+----------------------------------------
+今日总计：$totalHours小时$remainingMinutes分钟''';
+
+          await Clipboard.setData(ClipboardData(text: textWithTotal));
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('日志已复制到剪贴板')),
           );
@@ -65,4 +78,4 @@ class TodayRecordsPage extends StatelessWidget {
       ),
     );
   }
-} 
+}

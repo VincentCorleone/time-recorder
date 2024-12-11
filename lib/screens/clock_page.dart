@@ -27,6 +27,7 @@ class _ClockPageState extends State<ClockPage>
   late AnimationController _animationController;
   late Animation<double> _animation;
   late DateTime startTime;
+  final TextEditingController _taskNameController = TextEditingController();
 
   @override
   void initState() {
@@ -83,6 +84,33 @@ class _ClockPageState extends State<ClockPage>
     _timer.cancel();
     _animationController.stop();
 
+    // 初始化输入框的值为当前任务名称
+    _taskNameController.text = widget.task;
+    
+    // 显示对话框让用户修改任务名称
+    final newTaskName = await showDialog<String>(
+      context: navigatorContext,
+      builder: (context) => AlertDialog(
+        title: Text('修改任务名称'),
+        content: TextField(
+          controller: _taskNameController,
+          decoration: InputDecoration(
+            hintText: '请输入任务名称',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, _taskNameController.text),
+            child: Text('确定'),
+          ),
+        ],
+      ),
+    );
+
     // 显示提示信息
     ScaffoldMessenger.of(navigatorContext).showSnackBar(
       SnackBar(
@@ -91,9 +119,12 @@ class _ClockPageState extends State<ClockPage>
       ),
     );
 
-    await _saveTaskToDatabase();
+    if (newTaskName != null && newTaskName.isNotEmpty) {
+      await _saveTaskToDatabase(newTaskName);
+    } else {
+      await _saveTaskToDatabase(widget.task);
+    }
 
-    // 等待 2 秒让用户看提示
     await Future.delayed(Duration(seconds: 2));
 
     if (mounted) {
@@ -108,7 +139,7 @@ class _ClockPageState extends State<ClockPage>
     super.dispose();
   }
 
-  Future<void> _saveTaskToDatabase() async {
+  Future<void> _saveTaskToDatabase(String taskName) async {
     final endTime = DateTime.now();
     try {
       await DatabaseHelper.instance.clearUnfinishedTask();
@@ -117,7 +148,7 @@ class _ClockPageState extends State<ClockPage>
       print('SQLite数据库文件路径: $path');
 
       await DatabaseHelper.instance.insertTask(
-        widget.task,
+        taskName,
         startTime,
         endTime,
       );
@@ -180,8 +211,41 @@ class _ClockPageState extends State<ClockPage>
               onPressed: () async {
                 _timer.cancel();
                 _animationController.stop();
-                await _saveTaskToDatabase();
-                Navigator.of(context).pop();
+                
+                // 初始化输入框的值为当前任务名称
+                _taskNameController.text = widget.task;
+                
+                // 显示对话框让用户修改任务名称
+                final newTaskName = await showDialog<String>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('修改任务名称'),
+                    content: TextField(
+                      controller: _taskNameController,
+                      decoration: InputDecoration(
+                        hintText: '请输入任务名称',
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text('取消'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, _taskNameController.text),
+                        child: Text('确定'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (newTaskName != null && newTaskName.isNotEmpty) {
+                  await _saveTaskToDatabase(newTaskName);
+                } else {
+                  await _saveTaskToDatabase(widget.task);
+                }
+                
+                if (mounted) Navigator.pop(context);
               },
               child: Text(
                 '完成',

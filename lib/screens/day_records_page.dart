@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../utils/database_helper.dart';
+import '../utils/time_formatter.dart';
 
 class DayRecordsPage extends StatelessWidget {
   final DateTime selectedDate;
@@ -55,15 +56,27 @@ class DayRecordsPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final tasks = await DatabaseHelper.instance.getDayTasks(selectedDate);
+          
+          // 计算总时间
+          int totalMinutes = tasks.fold(0, (sum, task) => sum + (task['duration'] as int));
+          final totalHours = totalMinutes ~/ 60;
+          final remainingMinutes = totalMinutes % 60;
+          
+          // 格式化任务列表
           final formattedText = tasks.map((task) {
             final startTime = DateTime.parse(task['startTime']);
             final endTime = DateTime.parse(task['endTime']);
-            return '${_formatTime(startTime)}~${_formatTime(endTime)} [${task['duration']}分钟] ${task['name']}';
+            return '${TimeFormatter.formatTime(startTime)}~${TimeFormatter.formatTime(endTime)} [${task['duration']}分钟] ${task['name']}';
           }).join('\n');
 
-          await Clipboard.setData(ClipboardData(text: formattedText));
+          // 添加总时间统计
+          final textWithTotal = '''$formattedText
+----------------------------------------
+当日总计：$totalHours小时$remainingMinutes分钟''';
+
+          await Clipboard.setData(ClipboardData(text: textWithTotal));
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('日志已复制到��贴板')),
+            SnackBar(content: Text('日志已复制到剪贴板')),
           );
         },
         backgroundColor: Colors.orange,
