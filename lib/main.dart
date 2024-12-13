@@ -5,29 +5,12 @@ import 'utils/database_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final unfinishedTask = await DatabaseHelper.instance.getUnfinishedTask();
-  runApp(MyApp(unfinishedTask: unfinishedTask));
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final Map<String, dynamic>? unfinishedTask;
-
-  const MyApp({super.key, this.unfinishedTask});
-
   @override
   Widget build(BuildContext context) {
-    Widget home;
-    if (unfinishedTask != null) {
-      final taskName = unfinishedTask!['name'];
-      final startTime = DateTime.parse(unfinishedTask!['startTime']);
-      home = ClockPage(
-        task: taskName,
-        resumeStartTime: startTime,
-      );
-    } else {
-      home = MainScreen();
-    }
-
     return MaterialApp(
       title: 'Namer App',
       theme: ThemeData(
@@ -35,7 +18,37 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
       ),
       debugShowCheckedModeBanner: false,
-      home: home,
+      home: FutureBuilder<Map<String, dynamic>?>(
+        future: DatabaseHelper.instance.getUnfinishedTask(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // 数据加载中，展示加载指示器
+            return Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          } else if (snapshot.hasError) {
+            // 处理错误情况
+            return Scaffold(
+              body: Center(child: Text('加载失败: ${snapshot.error}')),
+            );
+          } else {
+            // 数据加载完成，展示主界面
+            final unfinishedTask = snapshot.data;
+            Widget home;
+            if (unfinishedTask != null) {
+              final taskName = unfinishedTask['name'];
+              final startTime = DateTime.parse(unfinishedTask['startTime']);
+              home = ClockPage(
+                task: taskName,
+                resumeStartTime: startTime,
+              );
+            } else {
+              home = MainScreen();
+            }
+            return home;
+          }
+        },
+      ),
     );
   }
 }
