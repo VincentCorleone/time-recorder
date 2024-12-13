@@ -9,7 +9,7 @@ import 'package:table_calendar/table_calendar.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  final unfinishedTask = await null;
+  final unfinishedTask = null;
   
   runApp(MyApp(unfinishedTask: unfinishedTask));
 }
