@@ -1,5 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'dart:io';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -9,6 +11,14 @@ class DatabaseHelper {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
+    
+    // 初始化 FFI
+    if (Platform.isWindows || Platform.isLinux) {
+      // 在 Windows 或 Linux 上初始化 sqflite_ffi
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    }
+    
     _database = await _initDB('tasks.db');
     return _database!;
   }

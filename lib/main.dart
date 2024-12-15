@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'screens/main_screen.dart';
 import 'screens/clock_page.dart';
 import 'utils/database_helper.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'dart:io';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+void main() {
+  // 在 Windows 和 Linux 上初始化 FFI
+  if (Platform.isWindows || Platform.isLinux) {
+    sqfliteFfiInit();
+  }
   runApp(MyApp());
 }
 
